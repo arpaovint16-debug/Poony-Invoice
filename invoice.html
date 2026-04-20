@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบออกเอกสาร - บริษัท เทพบุตร รวยไม่ จำกัด</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary-color: #333;
+            --border-color: #ddd;
+        }
+
+        body { font-family: 'Sarabun', sans-serif; background-color: #e9ecef; margin: 0; padding: 20px; color: #333; }
+        .document-container { max-width: 800px; margin: 0 auto; background: #fff; padding: 40px 50px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        
+        /* Typography & Layout */
+        h2 { text-align: center; margin: 0 0 20px 0; font-size: 24px; }
+        .company-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary-color); padding-bottom: 20px; }
+        .flex-between { display: flex; justify-content: space-between; }
+        .flex-col { display: flex; flex-direction: column; gap: 5px; }
+        
+        /* Inputs */
+        input, select { font-family: 'Sarabun', sans-serif; font-size: 15px; border: 1px dashed #bbb; padding: 4px; background: transparent; width: 100%; box-sizing: border-box; }
+        input:focus, select:focus { outline: none; border-bottom: 1px solid #000; background-color: #f8f9fa; }
+        
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; }
+        th, td { border: 1px solid var(--border-color); padding: 10px; text-align: left; }
+        th { background-color: #f8f9fa; font-weight: 600; text-align: center; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        
+        /* Controls & Buttons */
+        .controls { max-width: 800px; margin: 0 auto 20px auto; background: #fff; padding: 15px; display: flex; gap: 10px; justify-content: center; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        button { font-family: 'Sarabun', sans-serif; padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        .btn-primary { background-color: #0d6efd; color: white; }
+        .btn-primary:hover { background-color: #0b5ed7; }
+        .btn-success { background-color: #198754; color: white; font-weight: bold; }
+        .btn-success:hover { background-color: #157347; }
+        .btn-danger { background-color: #dc3545; color: white; padding: 4px 8px; font-size: 12px; }
+        
+        .totals-box { width: 300px; float: right; }
+        .totals-box table { border: none; margin: 0; }
+        .totals-box td { border: none; padding: 5px 10px; }
+
+        /* Print Settings */
+        @media print {
+            body { background-color: #fff; padding: 0; }
+            .document-container { box-shadow: none; padding: 0; }
+            .controls, .btn-danger, .btn-primary { display: none !important; }
+            input, select { border: none; -webkit-appearance: none; -moz-appearance: none; appearance: none; padding: 0; }
+            /* Hide empty rows on print if they don't have descriptions */
+            input[value=""] { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <select id="docType" onchange="updateTitle()" style="width: auto; border: 1px solid #ccc; padding: 8px;">
+            <option value="ใบส่งของชั่วคราว">ใบส่งของชั่วคราว</option>
+            <option value="ใบเสนอราคา">ใบเสนอราคา</option>
+            <option value="ใบวางบิล">ใบวางบิล</option>
+            <option value="ใบเสร็จรับเงิน / ใบกำกับภาษี">ใบเสร็จรับเงิน / ใบกำกับภาษี</option>
+        </select>
+        <button class="btn-primary" onclick="addRow()">+ เพิ่มรายการสินค้า</button>
+        <button class="btn-success" onclick="window.print()">🖨️ พิมพ์ / Save PDF</button>
+    </div>
+
+    <div class="document-container">
+        
+        <div class="company-header">
+            <h2 id="docTitle">ใบส่งของชั่วคราว</h2>
+            <div><strong>บริษัท เทพบุตร รวยไม่ จำกัด</strong></div>
+            <div>39 ซอยพระรามเก้า 41 (ถนนเสรี2) แขวงพัฒนาการ เขตสวนหลวง กรุงเทพมหานคร 10250</div>
+            <div>เลขประจำตัวผู้เสียภาษี: 0105567174232 | โทร. 0824165463</div>
+        </div>
+
+        <div class="flex-between">
+            <div class="flex-col" style="width: 55%;">
+                <strong>ลูกค้า / ผู้ซื้อ:</strong>
+                <input type="text" placeholder="ชื่อบริษัทลูกค้า" value="บริษัท วาย เวิร์ค จํากัด (สาขา 00001)" style="font-weight: bold;">
+                <input type="text" placeholder="ที่อยู่บรรทัดที่ 1" value="เลขที่ 323/2 JAV01LS125 ชั้น 1 ซอยสุขุมวิท 55 (ทองหล่อ)">
+                <input type="text" placeholder="ที่อยู่บรรทัดที่ 2" value="แขวงคลองตันเหนือ เขตวัฒนา กรุงเทพมหานคร 10310">
+                <input type="text" placeholder="เลขประจำตัวผู้เสียภาษี" value="เลขประจำตัวผู้เสียภาษี 0105567178327">
+            </div>
+            <div class="flex-col" style="width: 35%;">
+                <div class="flex-between">
+                    <span>เลขที่เอกสาร:</span>
+                    <input type="text" placeholder="INV-0001" style="width: 60%; text-align: right;">
+                </div>
+                <div class="flex-between">
+                    <span>วันที่:</span>
+                    <input type="date" style="width: 60%; text-align: right;">
+                </div>
+                <div class="flex-between">
+                    <span>เงื่อนไขชำระเงิน:</span>
+                    <input type="text" value="เงินสด / โอนเงิน" style="width: 60%; text-align: right;">
+                </div>
+            </div>
+        </div>
+
+        <table id="invoiceTable">
+            <thead>
+                <tr>
+                    <th width="5%">ลําดับ</th>
+                    <th width="45%">รายการสินค้า</th>
+                    <th width="10%">จำนวน</th>
+                    <th width="15%">ราคา/หน่วย</th>
+                    <th width="20%" class="text-right">จำนวนเงิน (บาท)</th>
+                    <th width="5%" class="btn-danger-col" style="background: white; border: none;"></th>
+                </tr>
+            </thead>
+            <tbody id="itemBody">
+                <tr>
+                    <td class="text-center row-num">1</td>
+                    <td><input type="text" value="Coffee Bean Brazil 1 KG" placeholder="ชื่อสินค้า"></td>
+                    <td><input type="number" class="qty" value="6" oninput="calculate()" class="text-center"></td>
+                    <td><input type="number" class="price" value="800" oninput="calculate()" class="text-right"></td>
+                    <td class="text-right row-total">4,800.00</td>
+                    <td style="border: none;"><button class="btn-danger" onclick="removeRow(this)">X</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="totals-box">
+            <table>
+                <tr>
+                    <td class="text-right"><strong>รวมเงิน:</strong></td>
+                    <td width="40%" class="text-right" id="subtotal">0.00</td>
+                </tr>
+                <tr>
+                    <td class="text-right">
+                        <select id="vatRate" onchange="calculate()" style="width: 80px; text-align: right; display: inline-block;">
+                            <option value="7">VAT 7%</option>
+                            <option value="0">ไม่มี VAT</option>
+                        </select>
+                    </td>
+                    <td class="text-right" id="vat">0.00</td>
+                </tr>
+                <tr>
+                    <td class="text-right" style="border-top: 2px solid #000;"><strong>จำนวนเงินสุทธิ:</strong></td>
+                    <td class="text-right" style="border-top: 2px solid #000;"><strong id="grandtotal" style="font-size: 18px;">0.00</strong></td>
+                </tr>
+            </table>
+        </div>
+        <div style="clear: both; margin-bottom: 50px;"></div>
+
+        <div class="flex-between" style="text-align: center; margin-top: 50px;">
+            <div style="width: 30%;">
+                <div style="border-bottom: 1px solid #000; height: 30px; margin-bottom: 10px;"></div>
+                <div>ผู้รับสินค้า / ลูกค้า</div>
+                <div style="margin-top: 5px;"><input type="date" style="text-align: center;"></div>
+            </div>
+            <div style="width: 30%;">
+                <div style="border-bottom: 1px solid #000; height: 30px; margin-bottom: 10px;"></div>
+                <div>ผู้ส่งสินค้า / ผู้รับเงิน</div>
+                <div style="margin-top: 5px;"><input type="date" style="text-align: center;"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ตั้งค่าวันที่ปัจจุบันอัตโนมัติเมื่อเปิดหน้าเว็บ
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelectorAll('input[type="date"]').forEach(el => {
+                if(!el.value) el.value = today;
+            });
+            calculate();
+        });
+
+        // เปลี่ยนหัวเอกสาร
+        function updateTitle() {
+            document.getElementById('docTitle').innerText = document.getElementById('docType').value;
+        }
+
+        // คำนวณเงินทั้งหมด
+        function calculate() {
+            let subtotal = 0;
+            const rows = document.querySelectorAll('#itemBody tr');
+            
+            rows.forEach((row, index) => {
+                // อัปเดตเลขลำดับ
+                row.querySelector('.row-num').innerText = index + 1;
+                
+                const qty = parseFloat(row.querySelector('.qty').value) || 0;
+                const price = parseFloat(row.querySelector('.price').value) || 0;
+                const rowTotal = qty * price;
+                
+                row.querySelector('.row-total').innerText = rowTotal.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                subtotal += rowTotal;
+            });
+
+            const vatRate = parseFloat(document.getElementById('vatRate').value) / 100;
+            const vat = subtotal * vatRate;
+            const grandtotal = subtotal + vat;
+
+            document.getElementById('subtotal').innerText = subtotal.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('vat').innerText = vat.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('grandtotal').innerText = grandtotal.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        }
+
+        // เพิ่มแถวรายการสินค้า
+        function addRow() {
+            const tbody = document.getElementById('itemBody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td class="text-center row-num"></td>
+                <td><input type="text" placeholder="ชื่อสินค้า"></td>
+                <td><input type="number" class="qty" value="1" oninput="calculate()" class="text-center"></td>
+                <td><input type="number" class="price" value="0" oninput="calculate()" class="text-right"></td>
+                <td class="text-right row-total">0.00</td>
+                <td style="border: none;"><button class="btn-danger" onclick="removeRow(this)">X</button></td>
+            `;
+            tbody.appendChild(newRow);
+            calculate();
+        }
+
+        // ลบแถวรายการสินค้า
+        function removeRow(btn) {
+            const tbody = document.getElementById('itemBody');
+            if (tbody.children.length > 1) {
+                btn.closest('tr').remove();
+                calculate();
+            } else {
+                alert("ต้องมีรายการสินค้าอย่างน้อย 1 รายการ");
+            }
+        }
+    </script>
+</body>
+</html>
